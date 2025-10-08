@@ -1,13 +1,14 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+
+Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE html>
+<html lang=\"pt-BR\">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa Interativo de Obras</title>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>Mapa Interativo de Obras - Com Filtros</title>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\">
     
     <style>
         :root {
@@ -110,7 +111,7 @@
         }
         
         .form-group.required label:after {
-            content: " *";
+            content: \" *\";
             color: red;
         }
         
@@ -238,10 +239,47 @@
             border-radius: 4px;
             cursor: pointer;
             white-space: nowrap;
+            transition: all 0.3s ease;
         }
         
         .filter-btn.active {
             font-weight: bold;
+        }
+        
+        .filter-btn[data-filter=\"all\"] {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .filter-btn[data-filter=\"all\"].active {
+            background-color: #495057;
+        }
+        
+        .filter-btn[data-filter=\"aberta\"] {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .filter-btn[data-filter=\"aberta\"].active {
+            background-color: #1e7e34;
+        }
+        
+        .filter-btn[data-filter=\"fechada\"] {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .filter-btn[data-filter=\"fechada\"].active {
+            background-color: #bd2130;
+        }
+        
+        .filter-btn[data-filter=\"pendente\"] {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .filter-btn[data-filter=\"pendente\"].active {
+            background-color: #e0a800;
         }
         
         #status-message {
@@ -324,6 +362,21 @@
             display: inline-block;
             margin-right: 15px;
         }
+
+        /* Contador de pins visíveis */
+        #map-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
         
         /* Responsividade */
         @media (max-width: 768px) {
@@ -385,81 +438,83 @@
     </style>
 </head>
 <body>
-    <div id="header">
-        <button id="menu-toggle"><i class="fas fa-bars"></i></button>
-        <h1>Mapa Interativo de Obras</h1>
-        <div id="status-message"></div>
+    <div id=\"header\">
+        <button id=\"menu-toggle\"><i class=\"fas fa-bars\"></i></button>
+        <h1>Mapa Interativo de Obras - Com Filtros</h1>
+        <div id=\"status-message\"></div>
     </div>
     
-    <div id="app-container">
-        <div id="sidebar">
-            <div id="search-container">
-                <input type="text" id="search" placeholder="Pesquisar por WO ou PDO...">
+    <div id=\"app-container\">
+        <div id=\"sidebar\">
+            <div id=\"search-container\">
+                <input type=\"text\" id=\"search\" placeholder=\"Pesquisar por WO ou PDO...\">
             </div>
             
-            <div id="controls">
+            <div id=\"controls\">
                 <h3>Adicionar Nova WO</h3>
-                <div class="form-group required">
-                    <label for="new-wo">Número WO:</label>
-                    <input type="text" id="new-wo" placeholder="Qualquer identificador">
+                <div class=\"form-group required\">
+                    <label for=\"new-wo\">Número WO:</label>
+                    <input type=\"text\" id=\"new-wo\" placeholder=\"Qualquer identificador\">
                 </div>
-                <div class="form-group">
-                    <label for="new-pdo">PDO (opcional):</label>
-                    <input type="text" id="new-pdo" placeholder="Ex: PDO-92-LOU-0161.33">
+                <div class=\"form-group\">
+                    <label for=\"new-pdo\">PDO (opcional):</label>
+                    <input type=\"text\" id=\"new-pdo\" placeholder=\"Ex: PDO-92-LOU-0161.33\">
                 </div>
-                <div class="form-group">
-                    <label for="new-desc">Descrição (opcional):</label>
-                    <input type="text" id="new-desc" placeholder="Ex: Manutenção preventiva">
+                <div class=\"form-group\">
+                    <label for=\"new-desc\">Descrição (opcional):</label>
+                    <input type=\"text\" id=\"new-desc\" placeholder=\"Ex: Manutenção preventiva\">
                 </div>
-                <div class="form-group required">
-                    <label for="new-coords">Coordenadas (lat, lng):</label>
-                    <input type="text" id="new-coords" placeholder="Ex: 38.757450, -9.147659">
+                <div class=\"form-group required\">
+                    <label for=\"new-coords\">Coordenadas (lat, lng):</label>
+                    <input type=\"text\" id=\"new-coords\" placeholder=\"Ex: 38.757450, -9.147659\">
                 </div>
-                <div class="form-group">
+                <div class=\"form-group\">
                     <label>Prioridade (opcional):</label>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="new-priority-critica" name="priority" value="critica">
-                        <label for="new-priority-critica">Crítica</label>
+                    <div class=\"checkbox-group\">
+                        <input type=\"checkbox\" id=\"new-priority-critica\" name=\"priority\" value=\"critica\">
+                        <label for=\"new-priority-critica\">Crítica</label>
                     </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="new-priority-major" name="priority" value="major">
-                        <label for="new-priority-major">Major</label>
+                    <div class=\"checkbox-group\">
+                        <input type=\"checkbox\" id=\"new-priority-major\" name=\"priority\" value=\"major\">
+                        <label for=\"new-priority-major\">Major</label>
                     </div>
                 </div>
-                <button id="add-wo-btn">Adicionar WO</button>
+                <button id=\"add-wo-btn\">Adicionar WO</button>
             </div>
             
-            <div id="list-filters">
-                <button class="filter-btn active" data-filter="all">Todas</button>
-                <button class="filter-btn" data-filter="aberta">Abertas</button>
-                <button class="filter-btn" data-filter="fechada">Fechadas</button>
-                <button class="filter-btn" data-filter="pendente">Pendentes</button>
+            <div id=\"list-filters\">
+                <button class=\"filter-btn active\" data-filter=\"all\">Todas</button>
+                <button class=\"filter-btn\" data-filter=\"aberta\">Abertas</button>
+                <button class=\"filter-btn\" data-filter=\"fechada\">Fechadas</button>
+                <button class=\"filter-btn\" data-filter=\"pendente\">Pendentes</button>
             </div>
             
-            <div id="wo-list-container">
-                <div id="wo-list"></div>
+            <div id=\"wo-list-container\">
+                <div id=\"wo-list\"></div>
             </div>
         </div>
         
-        <div id="map"></div>
+        <div id=\"map\">
+            <div id=\"map-counter\">Pins visíveis: 0</div>
+        </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\"></script>
     
-    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-auth-compat.js"></script>
+    <script src=\"https://www.gstatic.com/firebasejs/10.5.2/firebase-app-compat.js\"></script>
+    <script src=\"https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore-compat.js\"></script>
+    <script src=\"https://www.gstatic.com/firebasejs/10.5.2/firebase-auth-compat.js\"></script>
     
     <script>
         // Configuração do Firebase (substitua com suas credenciais REAIS)
        const firebaseConfig = {
-            apiKey: "AIzaSyAx77w0C37mFYyWtikVzIdyWCxR2gaRpt8",
-            authDomain: "luciano-ddbf1.firebaseapp.com",
-            databaseURL: "https://luciano-ddbf1-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "luciano-ddbf1",
-            storageBucket: "luciano-ddbf1.firebasestorage.app",
-            messagingSenderId: "977493615798",
-            appId: "1:977493615798:web:9ab4fce9cc99bb098e3217"
+            apiKey: \"AIzaSyAx77w0C37mFYyWtikVzIdyWCxR2gaRpt8\",
+            authDomain: \"luciano-ddbf1.firebaseapp.com\",
+            databaseURL: \"https://luciano-ddbf1-default-rtdb.europe-west1.firebasedatabase.app\",
+            projectId: \"luciano-ddbf1\",
+            storageBucket: \"luciano-ddbf1.firebasestorage.app\",
+            messagingSenderId: \"977493615798\",
+            appId: \"1:977493615798:web:9ab4fce9cc99bb098e3217\"
           };
         // Inicializar Firebase
         let firebaseApp;
@@ -492,6 +547,42 @@
             }, 3000);
         }
         
+        // Função para atualizar contador de pins visíveis
+        function updateMapCounter() {
+            let visibleCount = 0;
+            Object.values(markers).forEach(marker => {
+                if (map.hasLayer(marker)) {
+                    visibleCount++;
+                }
+            });
+            
+            document.getElementById('map-counter').textContent = `Pins visíveis: ${visibleCount}`;
+        }
+        
+        // Função para aplicar filtros no mapa
+        function applyMapFilter(filter) {
+            currentFilter = filter;
+            
+            // Remover todos os marcadores do mapa
+            Object.values(markers).forEach(marker => {
+                map.removeLayer(marker);
+            });
+            
+            // Adicionar marcadores baseados no filtro
+            Object.values(markers).forEach(marker => {
+                const location = marker.location;
+                if (filter === 'all' || location.status === filter) {
+                    map.addLayer(marker);
+                }
+            });
+            
+            // Atualizar contador
+            updateMapCounter();
+            
+            // Log para debug
+            console.log(`Filtro aplicado: ${filter}. Pins visíveis: ${Object.values(markers).filter(marker => map.hasLayer(marker)).length}`);
+        }
+        
         // Função para alternar a sidebar em dispositivos móveis
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -521,52 +612,52 @@
         // Função para criar conteúdo do popup
         function createPopupContent(location) {
             const priorityHTML = location.priority 
-                ? `<div class="priority-options">
+                ? `<div class=\"priority-options\">
                       <strong>Prioridade:</strong><br>
-                      <input type="checkbox" id="popup-priority-critica-${location.wo}" 
+                      <input type=\"checkbox\" id=\"popup-priority-critica-${location.wo}\" 
                           ${location.priority === 'critica' ? 'checked' : ''} disabled>
-                      <label for="popup-priority-critica-${location.wo}">Crítica</label><br>
-                      <input type="checkbox" id="popup-priority-major-${location.wo}" 
+                      <label for=\"popup-priority-critica-${location.wo}\">Crítica</label><br>
+                      <input type=\"checkbox\" id=\"popup-priority-major-${location.wo}\" 
                           ${location.priority === 'major' ? 'checked' : ''} disabled>
-                      <label for="popup-priority-major-${location.wo}">Major</label>
+                      <label for=\"popup-priority-major-${location.wo}\">Major</label>
                    </div>`
                 : '';
             
             return `
-                <div class="info-window">
+                <div class=\"info-window\">
                     <strong>WO:</strong> ${location.wo}<br>
                     ${location.pdo ? `<strong>PDO:</strong> ${location.pdo}<br>` : ''}
                     ${location.descricao ? `<strong>Descrição:</strong> ${location.descricao}<br>` : ''}
-                    <div class="coordinates">
+                    <div class=\"coordinates\">
                         Coord: ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}
                     </div>
                     <br>
                     <strong>Status:</strong><br>
-                    <div class="status-checkbox">
-                        <input type="radio" id="popup-aberta-${location.wo}" name="popup-status-${location.wo}" value="aberta" 
+                    <div class=\"status-checkbox\">
+                        <input type=\"radio\" id=\"popup-aberta-${location.wo}\" name=\"popup-status-${location.wo}\" value=\"aberta\" 
                             ${location.status === 'aberta' ? 'checked' : ''}>
-                        <label for="popup-aberta-${location.wo}">Aberta</label><br>
+                        <label for=\"popup-aberta-${location.wo}\">Aberta</label><br>
                         
-                        <input type="radio" id="popup-fechada-${location.wo}" name="popup-status-${location.wo}" value="fechada" 
+                        <input type=\"radio\" id=\"popup-fechada-${location.wo}\" name=\"popup-status-${location.wo}\" value=\"fechada\" 
                             ${location.status === 'fechada' ? 'checked' : ''}>
-                        <label for="popup-fechada-${location.wo}">Fechada</label><br>
+                        <label for=\"popup-fechada-${location.wo}\">Fechada</label><br>
                         
-                        <input type="radio" id="popup-pendente-${location.wo}" name="popup-status-${location.wo}" value="pendente" 
+                        <input type=\"radio\" id=\"popup-pendente-${location.wo}\" name=\"popup-status-${location.wo}\" value=\"pendente\" 
                             ${location.status === 'pendente' ? 'checked' : ''}>
-                        <label for="popup-pendente-${location.wo}">Pendente</label>
+                        <label for=\"popup-pendente-${location.wo}\">Pendente</label>
                     </div>
                     ${priorityHTML}
-                    <div style="margin-top: 15px;">
-                        <span class="popup-edit-btn" onclick="startEditWo('${location.wo}')">
-                            <i class="fas fa-edit"></i> Editar
+                    <div style=\"margin-top: 15px;\">
+                        <span class=\"popup-edit-btn\" onclick=\"startEditWo('${location.wo}')\">
+                            <i class=\"fas fa-edit\"></i> Editar
                         </span>
-                        <span class="popup-delete-btn" onclick="deleteWo('${location.wo}')">
-                            <i class="fas fa-trash"></i> Excluir
+                        <span class=\"popup-delete-btn\" onclick=\"deleteWo('${location.wo}')\">
+                            <i class=\"fas fa-trash\"></i> Excluir
                         </span>
                     </div>
                     <br>
-                    <a href="https://www.google.com/maps?q=${location.lat},${location.lng}" target="_blank" style="color: #3498db;">
-                        <i class="fas fa-external-link-alt"></i> Abrir no Google Maps
+                    <a href=\"https://www.google.com/maps?q=${location.lat},${location.lng}\" target=\"_blank\" style=\"color: #3498db;\">
+                        <i class=\"fas fa-external-link-alt\"></i> Abrir no Google Maps
                     </a>
                 </div>
             `;
@@ -583,25 +674,25 @@
             const statusText = location.status.charAt(0).toUpperCase() + location.status.slice(1);
             
             const priorityHTML = location.priority 
-                ? `<div class="wo-priority priority-${location.priority}">
+                ? `<div class=\"wo-priority priority-${location.priority}\">
                       ${location.priority === 'critica' ? 'Crítica' : 'Major'}
                    </div>` 
                 : '';
             
             item.innerHTML = `
-                <div class="wo-header">
+                <div class=\"wo-header\">
                     <span>${location.wo}</span>
-                    <span class="wo-status ${statusClass}">${statusText}</span>
+                    <span class=\"wo-status ${statusClass}\">${statusText}</span>
                 </div>
-                ${location.pdo ? `<div class="wo-pdo">${location.pdo}</div>` : ''}
-                ${location.descricao ? `<div class="wo-desc">${location.descricao}</div>` : ''}
+                ${location.pdo ? `<div class=\"wo-pdo\">${location.pdo}</div>` : ''}
+                ${location.descricao ? `<div class=\"wo-desc\">${location.descricao}</div>` : ''}
                 ${priorityHTML}
-                <div class="action-buttons">
-                    <div class="edit-btn" onclick="event.stopPropagation(); startEditWo('${location.wo}')">
-                        <i class="fas fa-edit"></i> Editar
+                <div class=\"action-buttons\">
+                    <div class=\"edit-btn\" onclick=\"event.stopPropagation(); startEditWo('${location.wo}')\">
+                        <i class=\"fas fa-edit\"></i> Editar
                     </div>
-                    <div class="delete-btn" onclick="event.stopPropagation(); deleteWo('${location.wo}')">
-                        <i class="fas fa-trash"></i> Excluir
+                    <div class=\"delete-btn\" onclick=\"event.stopPropagation(); deleteWo('${location.wo}')\">
+                        <i class=\"fas fa-trash\"></i> Excluir
                     </div>
                 </div>
             `;
@@ -614,7 +705,7 @@
                 
                 // Centralizar no mapa e abrir popup
                 const marker = markers[location.wo];
-                if (marker) {
+                if (marker && map.hasLayer(marker)) {
                     map.setView(marker.getLatLng(), 15);
                     marker.openPopup();
                     
@@ -622,6 +713,9 @@
                     if (window.innerWidth <= 768) {
                         toggleSidebar();
                     }
+                } else if (marker) {
+                    // Se o marcador existe mas não está visível devido ao filtro
+                    showStatusMessage(`WO ${location.wo} está oculta pelo filtro atual. Selecione \"Todas\" para visualizar.`, true);
                 }
             });
             
@@ -654,7 +748,7 @@
             const marker = L.marker([location.lat, location.lng], {
                 icon: getStatusIcon(location.status),
                 title: location.wo
-            }).addTo(map);
+            });
             
             // Armazenar dados da localização no marcador
             marker.location = location;
@@ -671,7 +765,7 @@
                 updatePopupContent();
                 
                 // Adicionar listeners para os radio buttons
-                document.querySelectorAll(`input[name="popup-status-${location.wo}"]`).forEach(radio => {
+                document.querySelectorAll(`input[name=\"popup-status-${location.wo}\"]`).forEach(radio => {
                     radio.addEventListener('change', async (e) => {
                         const newStatus = e.target.value;
                         marker.setIcon(getStatusIcon(newStatus));
@@ -686,8 +780,15 @@
                             showStatusMessage('Status atualizado com sucesso!');
                             updatePopupContent();
                             updateWoList(document.getElementById('search').value);
+                            
+                            // Verificar se o marcador ainda deve estar visível com o filtro atual
+                            if (currentFilter !== 'all' && newStatus !== currentFilter) {
+                                map.removeLayer(marker);
+                                updateMapCounter();
+                                showStatusMessage(`WO movida para status \"${newStatus}\". Use filtro \"Todas\" para visualizar.`);
+                            }
                         } catch (error) {
-                            console.error("Erro ao atualizar status:", error);
+                            console.error(\"Erro ao atualizar status:\", error);
                             showStatusMessage('Erro ao atualizar status', true);
                         }
                     });
@@ -695,6 +796,12 @@
             });
             
             markers[location.wo] = marker;
+            
+            // Adicionar ao mapa apenas se passar pelo filtro atual
+            if (currentFilter === 'all' || location.status === currentFilter) {
+                map.addLayer(marker);
+            }
+            
             return marker;
         }
         
@@ -715,7 +822,7 @@
             document.getElementById('new-priority-critica').checked = location.priority === 'critica';
             document.getElementById('new-priority-major').checked = location.priority === 'major';
             
-            // Alterar botão para "Atualizar WO"
+            // Alterar botão para \"Atualizar WO\"
             const addButton = document.getElementById('add-wo-btn');
             addButton.textContent = 'Atualizar WO';
             addButton.style.backgroundColor = '#007bff';
@@ -761,6 +868,7 @@
                         map.removeLayer(markers[wo]);
                         delete markers[wo];
                         updateWoList(document.getElementById('search').value);
+                        updateMapCounter();
                     }
                     
                     // Se estava editando, cancelar edição
@@ -768,7 +876,7 @@
                         cancelEdit();
                     }
                 } catch (error) {
-                    console.error("Erro ao excluir WO:", error);
+                    console.error(\"Erro ao excluir WO:\", error);
                     showStatusMessage('Erro ao excluir WO', true);
                 }
             }
@@ -784,9 +892,18 @@
                     if (change.type === 'added' || change.type === 'modified') {
                         if (markers[data.wo]) {
                             // Atualizar marcador existente
+                            const wasVisible = map.hasLayer(markers[data.wo]);
                             markers[data.wo].setIcon(getStatusIcon(data.status));
                             markers[data.wo].location = data;
                             markers[data.wo].setPopupContent(createPopupContent(data));
+                            
+                            // Verificar se deve continuar visível
+                            const shouldBeVisible = currentFilter === 'all' || data.status === currentFilter;
+                            if (shouldBeVisible && !wasVisible) {
+                                map.addLayer(markers[data.wo]);
+                            } else if (!shouldBeVisible && wasVisible) {
+                                map.removeLayer(markers[data.wo]);
+                            }
                         } else {
                             // Adicionar novo marcador
                             addMarker(data);
@@ -804,8 +921,9 @@
                 // Atualizar lista completa
                 allWOs = snapshot.docs.map(doc => doc.data());
                 updateWoList(document.getElementById('search').value);
+                updateMapCounter();
             }, (error) => {
-                console.error("Erro ao carregar dados:", error);
+                console.error(\"Erro ao carregar dados:\", error);
                 showStatusMessage('Erro ao carregar dados', true);
             });
         }
@@ -815,7 +933,7 @@
             try {
                 // Autenticar anonimamente
                 await auth.signInAnonymously();
-                console.log("Autenticado anonimamente com ID:", auth.currentUser.uid);
+                console.log(\"Autenticado anonimamente com ID:\", auth.currentUser.uid);
                 
                 // Configurar botão de menu para mobile
                 document.getElementById('menu-toggle').addEventListener('click', toggleSidebar);
@@ -823,7 +941,7 @@
                 // Inicializar mapa
                 map = L.map('map').setView([38.822771, -9.144502], 13);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    attribution: '© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors'
                 }).addTo(map);
                 
                 // Configurar pesquisa
@@ -831,13 +949,26 @@
                     updateWoList(e.target.value);
                 });
                 
-                // Configurar filtros
+                // Configurar filtros - NOVA FUNCIONALIDADE MELHORADA
                 document.querySelectorAll('.filter-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
+                        // Atualizar botões ativos
                         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
-                        currentFilter = this.dataset.filter;
+                        
+                        // Aplicar filtro no mapa E na lista
+                        const newFilter = this.dataset.filter;
+                        applyMapFilter(newFilter);
                         updateWoList(document.getElementById('search').value);
+                        
+                        // Feedback visual
+                        const filterNames = {
+                            'all': 'Todas as WOs',
+                            'aberta': 'WOs Abertas',
+                            'fechada': 'WOs Fechadas',
+                            'pendente': 'WOs Pendentes'
+                        };
+                        showStatusMessage(`Filtro ativo: ${filterNames[newFilter]}`);
                     });
                 });
                 
@@ -937,7 +1068,7 @@
                             document.getElementById('new-priority-major').checked = false;
                         }
                     } catch (error) {
-                        console.error("Erro ao salvar WO:", error);
+                        console.error(\"Erro ao salvar WO:\", error);
                         showStatusMessage('Erro ao salvar WO', true);
                     }
                 });
@@ -952,8 +1083,11 @@
                     }
                 });
                 
+                // Inicializar contador
+                updateMapCounter();
+                
             } catch (error) {
-                console.error("Erro na inicialização:", error);
+                console.error(\"Erro na inicialização:\", error);
                 showStatusMessage('Erro ao inicializar o aplicativo', true);
                 
                 // Verificar se é erro de permissão
@@ -971,5 +1105,5 @@
         });
     </script>
 </body>
-</html>
-```
+</html>"
+Observation: Create successful: /app/mapa-obras-melhorado.html
