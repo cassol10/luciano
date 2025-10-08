@@ -1,21 +1,18 @@
-
-Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE html>
+Agora vou criar uma versão corrigida e simplificada do código. Identifiquei alguns problemas potenciais:
+Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE html>
 <html lang=\"pt-BR\">
 <head>
     <meta charset=\"UTF-8\">
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>Mapa Interativo de Obras - Com Filtros</title>
+    <title>Mapa Interativo de Obras - Filtros Funcionais</title>
     
     <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />
-    
     <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\">
     
     <style>
         :root {
             --sidebar-width: 350px;
-            --mobile-breakpoint: 768px;
             --header-height: 60px;
-            --controls-height: 50px;
         }
         
         * {
@@ -50,6 +47,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         #map {
             flex: 1;
             height: 100%;
+            position: relative;
         }
         
         #header {
@@ -74,7 +72,6 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             color: white;
             font-size: 20px;
             cursor: pointer;
-            margin-right: 10px;
         }
         
         #search-container {
@@ -97,7 +94,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             background: #e9ecef;
             border-bottom: 1px solid #dee2e6;
             overflow-y: auto;
-            max-height: 40vh;
+            max-height: 35vh;
         }
         
         .form-group {
@@ -133,6 +130,10 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             margin-top: 10px;
         }
         
+        #add-wo-btn:hover {
+            background-color: #218838;
+        }
+        
         #wo-list-container {
             flex: 1;
             display: flex;
@@ -144,24 +145,6 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             flex: 1;
             overflow-y: auto;
             padding: 10px;
-        }
-        
-        /* Custom Scrollbar */
-        #wo-list::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        #wo-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        #wo-list::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-        
-        #wo-list::-webkit-scrollbar-thumb:hover {
-            background: #555;
         }
         
         .wo-item {
@@ -234,16 +217,13 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         .filter-btn {
             flex: 1;
             min-width: 70px;
-            padding: 5px;
-            border: none;
+            padding: 8px;
+            border: 2px solid transparent;
             border-radius: 4px;
             cursor: pointer;
             white-space: nowrap;
             transition: all 0.3s ease;
-        }
-        
-        .filter-btn.active {
-            font-weight: bold;
+            font-weight: 500;
         }
         
         .filter-btn[data-filter=\"all\"] {
@@ -253,6 +233,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         
         .filter-btn[data-filter=\"all\"].active {
             background-color: #495057;
+            border-color: #343a40;
         }
         
         .filter-btn[data-filter=\"aberta\"] {
@@ -262,6 +243,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         
         .filter-btn[data-filter=\"aberta\"].active {
             background-color: #1e7e34;
+            border-color: #155724;
         }
         
         .filter-btn[data-filter=\"fechada\"] {
@@ -271,6 +253,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         
         .filter-btn[data-filter=\"fechada\"].active {
             background-color: #bd2130;
+            border-color: #721c24;
         }
         
         .filter-btn[data-filter=\"pendente\"] {
@@ -280,6 +263,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         
         .filter-btn[data-filter=\"pendente\"].active {
             background-color: #e0a800;
+            border-color: #b69500;
         }
         
         #status-message {
@@ -290,38 +274,6 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-        
-        .info-window {
-            font-family: Arial, sans-serif;
-            line-height: 1.4;
-            padding: 10px;
-            min-width: 250px;
-            max-width: 90vw;
-        }
-        
-        .status-checkbox {
-            margin: 5px 0;
-        }
-        
-        .priority-checkbox {
-            margin: 10px 0 5px 0;
-        }
-        
-        .coordinates {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-top: 5px;
-        }
-        
-        .leaflet-popup-content {
-            width: auto !important;
-        }
-        
-        .priority-options {
-            margin-top: 10px;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
         }
         
         .checkbox-group {
@@ -336,46 +288,39 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             gap: 15px;
         }
         
-        .delete-btn {
-            color: #dc3545;
+        .delete-btn, .edit-btn {
             cursor: pointer;
             font-size: 14px;
         }
         
-        .popup-delete-btn {
-            color: #dc3545;
+        .delete-btn { color: #dc3545; }
+        .edit-btn { color: #007bff; }
+        
+        .popup-delete-btn, .popup-edit-btn {
             cursor: pointer;
             margin-top: 10px;
             display: inline-block;
         }
         
-        .edit-btn {
-            color: #007bff;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        
-        .popup-edit-btn {
-            color: #007bff;
-            cursor: pointer;
-            margin-top: 10px;
-            display: inline-block;
+        .popup-delete-btn { color: #dc3545; }
+        .popup-edit-btn { 
+            color: #007bff; 
             margin-right: 15px;
         }
 
-        /* Contador de pins visíveis */
+        /* Contador de pins */
         #map-counter {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 12px;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 8px 15px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
-            color: #333;
             z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
         /* Responsividade */
@@ -398,23 +343,11 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             }
             
             #controls {
-                max-height: 30vh;
+                max-height: 25vh;
             }
             
             #header h1 {
-                font-size: 18px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            
-            .wo-item {
-                min-height: 70px;
-                padding: 10px;
-            }
-            
-            .action-buttons {
-                gap: 10px;
+                font-size: 16px;
             }
         }
         
@@ -422,25 +355,13 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             :root {
                 --sidebar-width: 90vw;
             }
-            
-            #controls {
-                padding: 10px;
-            }
-            
-            .form-group input, .form-group select {
-                padding: 6px;
-            }
-            
-            #add-wo-btn {
-                padding: 8px;
-            }
         }
     </style>
 </head>
 <body>
     <div id=\"header\">
         <button id=\"menu-toggle\"><i class=\"fas fa-bars\"></i></button>
-        <h1>Mapa Interativo de Obras - Com Filtros</h1>
+        <h1>Mapa Interativo de Obras</h1>
         <div id=\"status-message\"></div>
     </div>
     
@@ -454,7 +375,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                 <h3>Adicionar Nova WO</h3>
                 <div class=\"form-group required\">
                     <label for=\"new-wo\">Número WO:</label>
-                    <input type=\"text\" id=\"new-wo\" placeholder=\"Qualquer identificador\">
+                    <input type=\"text\" id=\"new-wo\" placeholder=\"Ex: WO-001\">
                 </div>
                 <div class=\"form-group\">
                     <label for=\"new-pdo\">PDO (opcional):</label>
@@ -499,15 +420,17 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\"></script>
-    
     <script src=\"https://www.gstatic.com/firebasejs/10.5.2/firebase-app-compat.js\"></script>
     <script src=\"https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore-compat.js\"></script>
     <script src=\"https://www.gstatic.com/firebasejs/10.5.2/firebase-auth-compat.js\"></script>
     
     <script>
-        // Configuração do Firebase (substitua com suas credenciais REAIS)
-       const firebaseConfig = {
+        console.log('🚀 Iniciando aplicação de mapa de obras...');
+        
+        // Configuração do Firebase
+        const firebaseConfig = {
             apiKey: \"AIzaSyAx77w0C37mFYyWtikVzIdyWCxR2gaRpt8\",
             authDomain: \"luciano-ddbf1.firebaseapp.com\",
             databaseURL: \"https://luciano-ddbf1-default-rtdb.europe-west1.firebasedatabase.app\",
@@ -515,12 +438,15 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             storageBucket: \"luciano-ddbf1.firebasestorage.app\",
             messagingSenderId: \"977493615798\",
             appId: \"1:977493615798:web:9ab4fce9cc99bb098e3217\"
-          };
+        };
+        
         // Inicializar Firebase
         let firebaseApp;
         try {
             firebaseApp = firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase inicializado com sucesso');
         } catch (error) {
+            console.log('🔄 Firebase já existe, usando instância existente');
             firebaseApp = firebase.app();
         }
         
@@ -538,6 +464,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         
         // Função para mostrar mensagem de status
         function showStatusMessage(message, isError = false) {
+            console.log(isError ? '❌' : '✅', message);
             const statusElement = document.getElementById('status-message');
             statusElement.textContent = message;
             statusElement.style.color = isError ? '#dc3545' : '#28a745';
@@ -556,40 +483,48 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                 }
             });
             
-            document.getElementById('map-counter').textContent = `Pins visíveis: ${visibleCount}`;
+            const counterElement = document.getElementById('map-counter');
+            counterElement.textContent = `Pins visíveis: ${visibleCount}`;
+            console.log(`📍 Contador atualizado: ${visibleCount} pins visíveis`);
         }
         
-        // Função para aplicar filtros no mapa
+        // Função PRINCIPAL para aplicar filtros no mapa
         function applyMapFilter(filter) {
+            console.log(`🔍 Aplicando filtro: ${filter}`);
             currentFilter = filter;
             
-            // Remover todos os marcadores do mapa
-            Object.values(markers).forEach(marker => {
-                map.removeLayer(marker);
-            });
+            let visibleCount = 0;
+            let hiddenCount = 0;
             
-            // Adicionar marcadores baseados no filtro
-            Object.values(markers).forEach(marker => {
+            // Percorrer todos os marcadores
+            Object.entries(markers).forEach(([wo, marker]) => {
                 const location = marker.location;
-                if (filter === 'all' || location.status === filter) {
-                    map.addLayer(marker);
+                const shouldShow = filter === 'all' || location.status === filter;
+                
+                if (shouldShow) {
+                    if (!map.hasLayer(marker)) {
+                        map.addLayer(marker);
+                    }
+                    visibleCount++;
+                } else {
+                    if (map.hasLayer(marker)) {
+                        map.removeLayer(marker);
+                    }
+                    hiddenCount++;
                 }
             });
             
-            // Atualizar contador
+            console.log(`📊 Resultado do filtro: ${visibleCount} visíveis, ${hiddenCount} ocultos`);
             updateMapCounter();
-            
-            // Log para debug
-            console.log(`Filtro aplicado: ${filter}. Pins visíveis: ${Object.values(markers).filter(marker => map.hasLayer(marker)).length}`);
         }
         
-        // Função para alternar a sidebar em dispositivos móveis
+        // Função para alternar sidebar
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('active');
         }
         
-        // Função para obter ícone com base no status
+        // Função para obter ícone do marcador baseado no status
         function getStatusIcon(status) {
             let color;
             switch(status) {
@@ -612,28 +547,25 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         // Função para criar conteúdo do popup
         function createPopupContent(location) {
             const priorityHTML = location.priority 
-                ? `<div class=\"priority-options\">
-                      <strong>Prioridade:</strong><br>
-                      <input type=\"checkbox\" id=\"popup-priority-critica-${location.wo}\" 
-                          ${location.priority === 'critica' ? 'checked' : ''} disabled>
-                      <label for=\"popup-priority-critica-${location.wo}\">Crítica</label><br>
-                      <input type=\"checkbox\" id=\"popup-priority-major-${location.wo}\" 
-                          ${location.priority === 'major' ? 'checked' : ''} disabled>
-                      <label for=\"popup-priority-major-${location.wo}\">Major</label>
+                ? `<div style=\"margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;\">
+                      <strong>Prioridade:</strong> 
+                      <span style=\"background: ${location.priority === 'critica' ? '#dc3545' : '#fd7e14'}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;\">
+                        ${location.priority === 'critica' ? 'Crítica' : 'Major'}
+                      </span>
                    </div>`
                 : '';
             
             return `
-                <div class=\"info-window\">
+                <div style=\"font-family: Arial, sans-serif; line-height: 1.4; min-width: 250px;\">
                     <strong>WO:</strong> ${location.wo}<br>
                     ${location.pdo ? `<strong>PDO:</strong> ${location.pdo}<br>` : ''}
                     ${location.descricao ? `<strong>Descrição:</strong> ${location.descricao}<br>` : ''}
-                    <div class=\"coordinates\">
+                    <div style=\"font-size: 0.9em; color: #6c757d; margin: 5px 0;\">
                         Coord: ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}
                     </div>
                     <br>
                     <strong>Status:</strong><br>
-                    <div class=\"status-checkbox\">
+                    <div style=\"margin: 5px 0;\">
                         <input type=\"radio\" id=\"popup-aberta-${location.wo}\" name=\"popup-status-${location.wo}\" value=\"aberta\" 
                             ${location.status === 'aberta' ? 'checked' : ''}>
                         <label for=\"popup-aberta-${location.wo}\">Aberta</label><br>
@@ -648,16 +580,16 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                     </div>
                     ${priorityHTML}
                     <div style=\"margin-top: 15px;\">
-                        <span class=\"popup-edit-btn\" onclick=\"startEditWo('${location.wo}')\">
+                        <span class=\"popup-edit-btn\" onclick=\"startEditWo('${location.wo}')\" style=\"color: #007bff; cursor: pointer; margin-right: 15px;\">
                             <i class=\"fas fa-edit\"></i> Editar
                         </span>
-                        <span class=\"popup-delete-btn\" onclick=\"deleteWo('${location.wo}')\">
+                        <span class=\"popup-delete-btn\" onclick=\"deleteWo('${location.wo}')\" style=\"color: #dc3545; cursor: pointer;\">
                             <i class=\"fas fa-trash\"></i> Excluir
                         </span>
                     </div>
                     <br>
                     <a href=\"https://www.google.com/maps?q=${location.lat},${location.lng}\" target=\"_blank\" style=\"color: #3498db;\">
-                        <i class=\"fas fa-external-link-alt\"></i> Abrir no Google Maps
+                        <i class=\"fas fa-external-link-alt\"></i> Ver no Google Maps
                     </a>
                 </div>
             `;
@@ -689,16 +621,16 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                 ${priorityHTML}
                 <div class=\"action-buttons\">
                     <div class=\"edit-btn\" onclick=\"event.stopPropagation(); startEditWo('${location.wo}')\">
-                        <i class=\"fas fa-edit\"></i> Editar
+                        <i class=\"fas fa-edit\"></i>
                     </div>
                     <div class=\"delete-btn\" onclick=\"event.stopPropagation(); deleteWo('${location.wo}')\">
-                        <i class=\"fas fa-trash\"></i> Excluir
+                        <i class=\"fas fa-trash\"></i>
                     </div>
                 </div>
             `;
             
             item.addEventListener('click', () => {
-                // Selecionar item
+                // Remover seleção anterior
                 document.querySelectorAll('.wo-item').forEach(el => el.classList.remove('selected'));
                 item.classList.add('selected');
                 selectedWo = location.wo;
@@ -709,20 +641,19 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                     map.setView(marker.getLatLng(), 15);
                     marker.openPopup();
                     
-                    // Em dispositivos móveis, fechar a sidebar ao selecionar um item
+                    // Fechar sidebar em mobile
                     if (window.innerWidth <= 768) {
                         toggleSidebar();
                     }
                 } else if (marker) {
-                    // Se o marcador existe mas não está visível devido ao filtro
-                    showStatusMessage(`WO ${location.wo} está oculta pelo filtro atual. Selecione \"Todas\" para visualizar.`, true);
+                    showStatusMessage(`WO ${location.wo} está filtrada. Use \"Todas\" para visualizar.`, true);
                 }
             });
             
             return item;
         }
         
-        // Função para filtrar e atualizar a lista
+        // Função para atualizar lista de WOs
         function updateWoList(filterText = '') {
             const woList = document.getElementById('wo-list');
             woList.innerHTML = '';
@@ -741,52 +672,49 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                     const listItem = createWoListItem(wo);
                     woList.appendChild(listItem);
                 });
+                
+            console.log(`📝 Lista atualizada: ${filteredWOs.length} WOs exibidas`);
         }
         
         // Função para adicionar marcador ao mapa
         function addMarker(location) {
+            console.log(`📍 Adicionando marcador para WO: ${location.wo}`);
+            
             const marker = L.marker([location.lat, location.lng], {
                 icon: getStatusIcon(location.status),
                 title: location.wo
             });
             
-            // Armazenar dados da localização no marcador
+            // Armazenar dados no marcador
             marker.location = location;
             
-            // Criar popup com conteúdo dinâmico
-            const updatePopupContent = () => {
-                marker.setPopupContent(createPopupContent(location));
-            };
-            
+            // Configurar popup
             marker.bindPopup(createPopupContent(location));
             
             marker.on('popupopen', function() {
-                // Atualizar conteúdo do popup
-                updatePopupContent();
-                
-                // Adicionar listeners para os radio buttons
+                // Adicionar listeners para mudança de status
                 document.querySelectorAll(`input[name=\"popup-status-${location.wo}\"]`).forEach(radio => {
                     radio.addEventListener('change', async (e) => {
                         const newStatus = e.target.value;
+                        console.log(`🔄 Mudando status de ${location.wo} para: ${newStatus}`);
+                        
                         marker.setIcon(getStatusIcon(newStatus));
                         location.status = newStatus;
                         
                         try {
-                            // Atualizar no Firestore
                             await db.collection('locations').doc(location.wo).update({
                                 status: newStatus,
                                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                             });
+                            
                             showStatusMessage('Status atualizado com sucesso!');
-                            updatePopupContent();
                             updateWoList(document.getElementById('search').value);
                             
-                            // Verificar se o marcador ainda deve estar visível com o filtro atual
-                            if (currentFilter !== 'all' && newStatus !== currentFilter) {
-                                map.removeLayer(marker);
-                                updateMapCounter();
-                                showStatusMessage(`WO movida para status \"${newStatus}\". Use filtro \"Todas\" para visualizar.`);
-                            }
+                            // Verificar se ainda deve estar visível
+                            setTimeout(() => {
+                                applyMapFilter(currentFilter);
+                            }, 100);
+                            
                         } catch (error) {
                             console.error(\"Erro ao atualizar status:\", error);
                             showStatusMessage('Erro ao atualizar status', true);
@@ -797,7 +725,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             
             markers[location.wo] = marker;
             
-            // Adicionar ao mapa apenas se passar pelo filtro atual
+            // Adicionar ao mapa se passar pelo filtro
             if (currentFilter === 'all' || location.status === currentFilter) {
                 map.addLayer(marker);
             }
@@ -805,8 +733,9 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             return marker;
         }
         
-        // Função para iniciar edição de WO
+        // Função para iniciar edição
         window.startEditWo = function(wo) {
+            console.log(`✏️ Iniciando edição da WO: ${wo}`);
             const marker = markers[wo];
             if (!marker) return;
             
@@ -814,7 +743,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             editMode = true;
             woBeingEdited = wo;
             
-            // Preencher formulário com dados existentes
+            // Preencher formulário
             document.getElementById('new-wo').value = location.wo;
             document.getElementById('new-pdo').value = location.pdo || '';
             document.getElementById('new-desc').value = location.descricao || '';
@@ -822,16 +751,14 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
             document.getElementById('new-priority-critica').checked = location.priority === 'critica';
             document.getElementById('new-priority-major').checked = location.priority === 'major';
             
-            // Alterar botão para \"Atualizar WO\"
+            // Alterar botão
             const addButton = document.getElementById('add-wo-btn');
             addButton.textContent = 'Atualizar WO';
             addButton.style.backgroundColor = '#007bff';
             
-            // Rolagem para o formulário
-            document.getElementById('controls').scrollIntoView();
-            showStatusMessage(`Editando WO: ${wo}`, false);
+            showStatusMessage(`Editando WO: ${wo}`);
             
-            // Em dispositivos móveis, mostrar a sidebar
+            // Mostrar sidebar em mobile
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.add('active');
             }
@@ -839,6 +766,7 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         
         // Função para cancelar edição
         function cancelEdit() {
+            console.log('❌ Cancelando edição');
             editMode = false;
             woBeingEdited = null;
             
@@ -859,11 +787,11 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         // Função para deletar WO
         window.deleteWo = async function(wo) {
             if (confirm(`Tem certeza que deseja excluir a WO ${wo}?`)) {
+                console.log(`🗑️ Excluindo WO: ${wo}`);
                 try {
                     await db.collection('locations').doc(wo).delete();
                     showStatusMessage(`WO ${wo} excluída com sucesso!`);
                     
-                    // Remover marcador do mapa se existir
                     if (markers[wo]) {
                         map.removeLayer(markers[wo]);
                         delete markers[wo];
@@ -871,7 +799,6 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                         updateMapCounter();
                     }
                     
-                    // Se estava editando, cancelar edição
                     if (editMode && woBeingEdited === wo) {
                         cancelEdit();
                     }
@@ -884,33 +811,29 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
         
         // Função para carregar dados do Firestore
         function loadData() {
+            console.log('📂 Carregando dados do Firebase...');
             db.collection('locations').onSnapshot((snapshot) => {
-                allWOs = [];
+                console.log(`📥 Recebidos ${snapshot.docs.length} documentos`);
+                
                 snapshot.docChanges().forEach((change) => {
                     const data = change.doc.data();
                     
                     if (change.type === 'added' || change.type === 'modified') {
                         if (markers[data.wo]) {
-                            // Atualizar marcador existente
-                            const wasVisible = map.hasLayer(markers[data.wo]);
+                            // Atualizar existente
+                            console.log(`🔄 Atualizando WO: ${data.wo}`);
                             markers[data.wo].setIcon(getStatusIcon(data.status));
                             markers[data.wo].location = data;
                             markers[data.wo].setPopupContent(createPopupContent(data));
-                            
-                            // Verificar se deve continuar visível
-                            const shouldBeVisible = currentFilter === 'all' || data.status === currentFilter;
-                            if (shouldBeVisible && !wasVisible) {
-                                map.addLayer(markers[data.wo]);
-                            } else if (!shouldBeVisible && wasVisible) {
-                                map.removeLayer(markers[data.wo]);
-                            }
                         } else {
-                            // Adicionar novo marcador
+                            // Adicionar novo
+                            console.log(`➕ Adicionando nova WO: ${data.wo}`);
                             addMarker(data);
                         }
                     }
                     
                     if (change.type === 'removed') {
+                        console.log(`➖ Removendo WO: ${data.wo}`);
                         if (markers[data.wo]) {
                             map.removeLayer(markers[data.wo]);
                             delete markers[data.wo];
@@ -918,30 +841,33 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                     }
                 });
                 
-                // Atualizar lista completa
+                // Atualizar lista
                 allWOs = snapshot.docs.map(doc => doc.data());
                 updateWoList(document.getElementById('search').value);
                 updateMapCounter();
             }, (error) => {
-                console.error(\"Erro ao carregar dados:\", error);
+                console.error(\"❌ Erro ao carregar dados:\", error);
                 showStatusMessage('Erro ao carregar dados', true);
             });
         }
         
-        // Inicializar aplicação
+        // Inicialização da aplicação
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🎯 Inicializando aplicação...');
+            
             try {
-                // Autenticar anonimamente
+                // Autenticar
                 await auth.signInAnonymously();
-                console.log(\"Autenticado anonimamente com ID:\", auth.currentUser.uid);
+                console.log('🔐 Autenticado:', auth.currentUser.uid);
                 
-                // Configurar botão de menu para mobile
+                // Configurar menu mobile
                 document.getElementById('menu-toggle').addEventListener('click', toggleSidebar);
                 
                 // Inicializar mapa
-                map = L.map('map').setView([38.822771, -9.144502], 13);
+                console.log('🗺️ Inicializando mapa...');
+                map = L.map('map').setView([38.822771, -9.144502], 11);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors'
+                    attribution: '© OpenStreetMap contributors'
                 }).addTo(map);
                 
                 // Configurar pesquisa
@@ -949,47 +875,47 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                     updateWoList(e.target.value);
                 });
                 
-                // Configurar filtros - NOVA FUNCIONALIDADE MELHORADA
+                // CONFIGURAR FILTROS - PARTE MAIS IMPORTANTE
+                console.log('🔍 Configurando filtros...');
                 document.querySelectorAll('.filter-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        // Atualizar botões ativos
+                        console.log(`🎯 Filtro clicado: ${this.dataset.filter}`);
+                        
+                        // Atualizar botões
                         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
                         
-                        // Aplicar filtro no mapa E na lista
+                        // Aplicar filtro
                         const newFilter = this.dataset.filter;
                         applyMapFilter(newFilter);
                         updateWoList(document.getElementById('search').value);
                         
-                        // Feedback visual
+                        // Mensagem
                         const filterNames = {
                             'all': 'Todas as WOs',
                             'aberta': 'WOs Abertas',
                             'fechada': 'WOs Fechadas',
                             'pendente': 'WOs Pendentes'
                         };
-                        showStatusMessage(`Filtro ativo: ${filterNames[newFilter]}`);
+                        showStatusMessage(`Filtro: ${filterNames[newFilter]}`);
                     });
                 });
                 
-                // Configurar botão de adicionar/atualizar WO
+                // Configurar botão de adicionar
                 document.getElementById('add-wo-btn').addEventListener('click', async function() {
-                    const woInput = document.getElementById('new-wo');
-                    const coordsInput = document.getElementById('new-coords');
+                    console.log('➕ Tentando adicionar/atualizar WO...');
                     
-                    const wo = woInput.value.trim();
-                    const coords = coordsInput.value.trim();
+                    const wo = document.getElementById('new-wo').value.trim();
+                    const coords = document.getElementById('new-coords').value.trim();
                     
-                    // Validar campos obrigatórios
                     if (!wo || !coords) {
-                        showStatusMessage('Número WO e coordenadas são obrigatórios', true);
+                        showStatusMessage('WO e coordenadas são obrigatórios', true);
                         return;
                     }
                     
-                    // Validar coordenadas
                     const coordsArray = coords.split(',').map(c => c.trim());
                     if (coordsArray.length !== 2) {
-                        showStatusMessage('Formato de coordenadas inválido (use: lat, lng)', true);
+                        showStatusMessage('Formato: lat, lng', true);
                         return;
                     }
                     
@@ -997,16 +923,10 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                     const lng = parseFloat(coordsArray[1]);
                     
                     if (isNaN(lat) || isNaN(lng)) {
-                        showStatusMessage('Coordenadas devem ser números válidos', true);
+                        showStatusMessage('Coordenadas inválidas', true);
                         return;
                     }
                     
-                    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-                        showStatusMessage('Coordenadas fora do intervalo válido', true);
-                        return;
-                    }
-                    
-                    // Obter outros campos
                     const pdo = document.getElementById('new-pdo').value.trim();
                     const desc = document.getElementById('new-desc').value.trim();
                     let priority = null;
@@ -1017,7 +937,6 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                         priority = 'major';
                     }
                     
-                    // Criar objeto de localização
                     const locationData = {
                         wo: wo,
                         pdo: pdo || null,
@@ -1031,25 +950,20 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                     
                     try {
                         if (editMode) {
-                            // Modo edição - atualizar WO existente
                             if (wo !== woBeingEdited) {
-                                // Se o número WO foi alterado, precisamos criar um novo documento
                                 await db.collection('locations').doc(wo).set({
                                     ...locationData,
                                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                                 });
                                 await db.collection('locations').doc(woBeingEdited).delete();
                             } else {
-                                // Atualizar documento existente
                                 await db.collection('locations').doc(wo).update(locationData);
                             }
-                            
-                            showStatusMessage(`WO ${wo} atualizada com sucesso!`);
+                            showStatusMessage(`WO ${wo} atualizada!`);
                             cancelEdit();
                         } else {
-                            // Modo adição - criar nova WO
                             if (markers[wo]) {
-                                showStatusMessage('WO já existe no sistema', true);
+                                showStatusMessage('WO já existe', true);
                                 return;
                             }
                             
@@ -1057,47 +971,42 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
                                 ...locationData,
                                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
                             });
-                            showStatusMessage('WO adicionada com sucesso!');
+                            showStatusMessage('WO adicionada!');
                             
-                            // Limpar formulário
-                            woInput.value = '';
+                            // Limpar
+                            document.getElementById('new-wo').value = '';
                             document.getElementById('new-pdo').value = '';
                             document.getElementById('new-desc').value = '';
-                            coordsInput.value = '';
+                            document.getElementById('new-coords').value = '';
                             document.getElementById('new-priority-critica').checked = false;
                             document.getElementById('new-priority-major').checked = false;
                         }
                     } catch (error) {
-                        console.error(\"Erro ao salvar WO:\", error);
-                        showStatusMessage('Erro ao salvar WO', true);
+                        console.error(\"Erro ao salvar:\", error);
+                        showStatusMessage('Erro ao salvar', true);
                     }
                 });
                 
                 // Carregar dados
                 loadData();
                 
-                // Fechar sidebar ao clicar no mapa (mobile)
+                // Fechar sidebar ao clicar no mapa
                 map.on('click', function() {
                     if (window.innerWidth <= 768) {
                         document.getElementById('sidebar').classList.remove('active');
                     }
                 });
                 
-                // Inicializar contador
                 updateMapCounter();
+                console.log('✅ Aplicação inicializada com sucesso!');
                 
             } catch (error) {
-                console.error(\"Erro na inicialização:\", error);
-                showStatusMessage('Erro ao inicializar o aplicativo', true);
-                
-                // Verificar se é erro de permissão
-                if (error.code === 'permission-denied') {
-                    showStatusMessage('Configure as regras de segurança do Firestore', true);
-                }
+                console.error(\"❌ Erro na inicialização:\", error);
+                showStatusMessage('Erro ao inicializar', true);
             }
         });
         
-        // Redimensionamento responsivo
+        // Responsividade
         window.addEventListener('resize', function() {
             if (window.innerWidth > 768) {
                 document.getElementById('sidebar').classList.add('active');
@@ -1106,4 +1015,4 @@ Action: file_editor create /app/mapa-obras-melhorado.html --file-text "<!DOCTYPE
     </script>
 </body>
 </html>"
-Observation: Create successful: /app/mapa-obras-melhorado.html
+Observation: Create successful: /app/mapa-obras-corrigido.html
