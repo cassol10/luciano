@@ -1,4 +1,4 @@
-leia o código abaixo: <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -641,34 +641,39 @@ leia o código abaixo: <!DOCTYPE html>
                 return matchesFilter && matchesSearch;
             });
             
-// Função para atualizar marcadores no mapa baseado no filtro
-function updateMapMarkers() {
-    // Primeiro, remover todos os marcadores do mapa
-    Object.values(markers).forEach(marker => {
-        map.removeLayer(marker);
-    });
-
-    // Depois, adicionar apenas os marcadores que correspondem ao filtro
-    allWOs.forEach(wo => {
-        if (currentFilter === 'all' || wo.status === currentFilter) {
-            addMarker(wo);
-        }
-    });
-}
-
-// Função para aplicar filtro no mapa e lista
-function applyFilter(filter) {
-    currentFilter = filter;
-    updateWoList(document.getElementById('search').value);
-    updateMapMarkers();
-}
-            
             filteredWOs
                 .sort((a, b) => a.wo.localeCompare(b.wo))
                 .forEach(wo => {
                     const listItem = createWoListItem(wo);
                     woList.appendChild(listItem);
                 });
+        }
+        
+        // Função para atualizar marcadores no mapa baseado no filtro
+        function updateMapMarkers() {
+            // Primeiro, remover todos os marcadores do mapa
+            Object.values(markers).forEach(marker => {
+                map.removeLayer(marker);
+            });
+
+            // Limpar o objeto markers
+            Object.keys(markers).forEach(key => {
+                delete markers[key];
+            });
+
+            // Depois, adicionar apenas os marcadores que correspondem ao filtro
+            allWOs.forEach(wo => {
+                if (currentFilter === 'all' || wo.status === currentFilter) {
+                    addMarker(wo);
+                }
+            });
+        }
+
+        // Função para aplicar filtro no mapa e lista
+        function applyFilter(filter) {
+            currentFilter = filter;
+            updateWoList(document.getElementById('search').value);
+            updateMapMarkers();
         }
         
         // Função para adicionar marcador ao mapa
@@ -810,8 +815,10 @@ function applyFilter(filter) {
                             markers[data.wo].location = data;
                             markers[data.wo].setPopupContent(createPopupContent(data));
                         } else {
-                            // Adicionar novo marcador
-                            addMarker(data);
+                            // Adicionar novo marcador apenas se corresponder ao filtro atual
+                            if (currentFilter === 'all' || data.status === currentFilter) {
+                                addMarker(data);
+                            }
                         }
                     }
                     
@@ -853,14 +860,14 @@ function applyFilter(filter) {
                     updateWoList(e.target.value);
                 });
                 
-               // Configurar filtros
-                        document.querySelectorAll('.filter-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                                this.classList.add('active');
-                                applyFilter(this.dataset.filter);
-                            });
-                        });
+                // Configurar filtros
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        applyFilter(this.dataset.filter);
+                    });
+                });
                 
                 // Configurar botão de adicionar/atualizar WO
                 document.getElementById('add-wo-btn').addEventListener('click', async function() {
@@ -963,14 +970,8 @@ function applyFilter(filter) {
                     }
                 });
                 
-
-             // Carregar dados
-                        loadData();
-                        
-                        // Aplicar filtro inicial após carregar dados
-                        setTimeout(() => {
-                            updateMapMarkers();
-                        }, 1000);
+                // Carregar dados
+                loadData();
                 
                 // Fechar sidebar ao clicar no mapa (mobile)
                 map.on('click', function() {
