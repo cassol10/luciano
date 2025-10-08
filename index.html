@@ -641,6 +641,28 @@ leia o código abaixo: <!DOCTYPE html>
                 return matchesFilter && matchesSearch;
             });
             
+// Função para atualizar marcadores no mapa baseado no filtro
+function updateMapMarkers() {
+    // Primeiro, remover todos os marcadores do mapa
+    Object.values(markers).forEach(marker => {
+        map.removeLayer(marker);
+    });
+
+    // Depois, adicionar apenas os marcadores que correspondem ao filtro
+    allWOs.forEach(wo => {
+        if (currentFilter === 'all' || wo.status === currentFilter) {
+            addMarker(wo);
+        }
+    });
+}
+
+// Função para aplicar filtro no mapa e lista
+function applyFilter(filter) {
+    currentFilter = filter;
+    updateWoList(document.getElementById('search').value);
+    updateMapMarkers();
+}
+            
             filteredWOs
                 .sort((a, b) => a.wo.localeCompare(b.wo))
                 .forEach(wo => {
@@ -831,15 +853,14 @@ leia o código abaixo: <!DOCTYPE html>
                     updateWoList(e.target.value);
                 });
                 
-                // Configurar filtros
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        currentFilter = this.dataset.filter;
-                        updateWoList(document.getElementById('search').value);
-                    });
-                });
+               // Configurar filtros
+                        document.querySelectorAll('.filter-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                                this.classList.add('active');
+                                applyFilter(this.dataset.filter);
+                            });
+                        });
                 
                 // Configurar botão de adicionar/atualizar WO
                 document.getElementById('add-wo-btn').addEventListener('click', async function() {
@@ -942,8 +963,14 @@ leia o código abaixo: <!DOCTYPE html>
                     }
                 });
                 
-                // Carregar dados
-                loadData();
+
+             // Carregar dados
+                        loadData();
+                        
+                        // Aplicar filtro inicial após carregar dados
+                        setTimeout(() => {
+                            updateMapMarkers();
+                        }, 1000);
                 
                 // Fechar sidebar ao clicar no mapa (mobile)
                 map.on('click', function() {
