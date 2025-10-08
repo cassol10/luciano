@@ -1,18 +1,20 @@
-Agora vou criar uma versão corrigida e simplificada do código. Identifiquei alguns problemas potenciais:
-Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE html>
-<html lang=\"pt-BR\">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>Mapa Interativo de Obras - Filtros Funcionais</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interativo de Obras</title>
     
-    <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css\" />
-    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
             --sidebar-width: 350px;
+            --mobile-breakpoint: 768px;
             --header-height: 60px;
+            --controls-height: 50px;
         }
         
         * {
@@ -47,7 +49,6 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
         #map {
             flex: 1;
             height: 100%;
-            position: relative;
         }
         
         #header {
@@ -72,6 +73,7 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             color: white;
             font-size: 20px;
             cursor: pointer;
+            margin-right: 10px;
         }
         
         #search-container {
@@ -94,7 +96,7 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             background: #e9ecef;
             border-bottom: 1px solid #dee2e6;
             overflow-y: auto;
-            max-height: 35vh;
+            max-height: 40vh;
         }
         
         .form-group {
@@ -108,7 +110,7 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
         }
         
         .form-group.required label:after {
-            content: \" *\";
+            content: " *";
             color: red;
         }
         
@@ -130,10 +132,6 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             margin-top: 10px;
         }
         
-        #add-wo-btn:hover {
-            background-color: #218838;
-        }
-        
         #wo-list-container {
             flex: 1;
             display: flex;
@@ -145,6 +143,24 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             flex: 1;
             overflow-y: auto;
             padding: 10px;
+        }
+        
+        /* Custom Scrollbar */
+        #wo-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #wo-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        #wo-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        #wo-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
         
         .wo-item {
@@ -217,53 +233,15 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
         .filter-btn {
             flex: 1;
             min-width: 70px;
-            padding: 8px;
-            border: 2px solid transparent;
+            padding: 5px;
+            border: none;
             border-radius: 4px;
             cursor: pointer;
             white-space: nowrap;
-            transition: all 0.3s ease;
-            font-weight: 500;
         }
         
-        .filter-btn[data-filter=\"all\"] {
-            background-color: #6c757d;
-            color: white;
-        }
-        
-        .filter-btn[data-filter=\"all\"].active {
-            background-color: #495057;
-            border-color: #343a40;
-        }
-        
-        .filter-btn[data-filter=\"aberta\"] {
-            background-color: #28a745;
-            color: white;
-        }
-        
-        .filter-btn[data-filter=\"aberta\"].active {
-            background-color: #1e7e34;
-            border-color: #155724;
-        }
-        
-        .filter-btn[data-filter=\"fechada\"] {
-            background-color: #dc3545;
-            color: white;
-        }
-        
-        .filter-btn[data-filter=\"fechada\"].active {
-            background-color: #bd2130;
-            border-color: #721c24;
-        }
-        
-        .filter-btn[data-filter=\"pendente\"] {
-            background-color: #ffc107;
-            color: #212529;
-        }
-        
-        .filter-btn[data-filter=\"pendente\"].active {
-            background-color: #e0a800;
-            border-color: #b69500;
+        .filter-btn.active {
+            font-weight: bold;
         }
         
         #status-message {
@@ -274,6 +252,38 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        
+        .info-window {
+            font-family: Arial, sans-serif;
+            line-height: 1.4;
+            padding: 10px;
+            min-width: 250px;
+            max-width: 90vw;
+        }
+        
+        .status-checkbox {
+            margin: 5px 0;
+        }
+        
+        .priority-checkbox {
+            margin: 10px 0 5px 0;
+        }
+        
+        .coordinates {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .leaflet-popup-content {
+            width: auto !important;
+        }
+        
+        .priority-options {
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
         }
         
         .checkbox-group {
@@ -288,39 +298,31 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             gap: 15px;
         }
         
-        .delete-btn, .edit-btn {
+        .delete-btn {
+            color: #dc3545;
             cursor: pointer;
             font-size: 14px;
         }
         
-        .delete-btn { color: #dc3545; }
-        .edit-btn { color: #007bff; }
-        
-        .popup-delete-btn, .popup-edit-btn {
+        .popup-delete-btn {
+            color: #dc3545;
             cursor: pointer;
             margin-top: 10px;
             display: inline-block;
         }
         
-        .popup-delete-btn { color: #dc3545; }
-        .popup-edit-btn { 
-            color: #007bff; 
-            margin-right: 15px;
-        }
-
-        /* Contador de pins */
-        #map-counter {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(44, 62, 80, 0.9);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
+        .edit-btn {
+            color: #007bff;
+            cursor: pointer;
             font-size: 14px;
-            font-weight: bold;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .popup-edit-btn {
+            color: #007bff;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-block;
+            margin-right: 15px;
         }
         
         /* Responsividade */
@@ -343,11 +345,23 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             }
             
             #controls {
-                max-height: 25vh;
+                max-height: 30vh;
             }
             
             #header h1 {
-                font-size: 16px;
+                font-size: 18px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .wo-item {
+                min-height: 70px;
+                padding: 10px;
+            }
+            
+            .action-buttons {
+                gap: 10px;
             }
         }
         
@@ -355,98 +369,103 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             :root {
                 --sidebar-width: 90vw;
             }
+            
+            #controls {
+                padding: 10px;
+            }
+            
+            .form-group input, .form-group select {
+                padding: 6px;
+            }
+            
+            #add-wo-btn {
+                padding: 8px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id=\"header\">
-        <button id=\"menu-toggle\"><i class=\"fas fa-bars\"></i></button>
+    <div id="header">
+        <button id="menu-toggle"><i class="fas fa-bars"></i></button>
         <h1>Mapa Interativo de Obras</h1>
-        <div id=\"status-message\"></div>
+        <div id="status-message"></div>
     </div>
     
-    <div id=\"app-container\">
-        <div id=\"sidebar\">
-            <div id=\"search-container\">
-                <input type=\"text\" id=\"search\" placeholder=\"Pesquisar por WO ou PDO...\">
+    <div id="app-container">
+        <div id="sidebar">
+            <div id="search-container">
+                <input type="text" id="search" placeholder="Pesquisar por WO ou PDO...">
             </div>
             
-            <div id=\"controls\">
+            <div id="controls">
                 <h3>Adicionar Nova WO</h3>
-                <div class=\"form-group required\">
-                    <label for=\"new-wo\">Número WO:</label>
-                    <input type=\"text\" id=\"new-wo\" placeholder=\"Ex: WO-001\">
+                <div class="form-group required">
+                    <label for="new-wo">Número WO:</label>
+                    <input type="text" id="new-wo" placeholder="Qualquer identificador">
                 </div>
-                <div class=\"form-group\">
-                    <label for=\"new-pdo\">PDO (opcional):</label>
-                    <input type=\"text\" id=\"new-pdo\" placeholder=\"Ex: PDO-92-LOU-0161.33\">
+                <div class="form-group">
+                    <label for="new-pdo">PDO (opcional):</label>
+                    <input type="text" id="new-pdo" placeholder="Ex: PDO-92-LOU-0161.33">
                 </div>
-                <div class=\"form-group\">
-                    <label for=\"new-desc\">Descrição (opcional):</label>
-                    <input type=\"text\" id=\"new-desc\" placeholder=\"Ex: Manutenção preventiva\">
+                <div class="form-group">
+                    <label for="new-desc">Descrição (opcional):</label>
+                    <input type="text" id="new-desc" placeholder="Ex: Manutenção preventiva">
                 </div>
-                <div class=\"form-group required\">
-                    <label for=\"new-coords\">Coordenadas (lat, lng):</label>
-                    <input type=\"text\" id=\"new-coords\" placeholder=\"Ex: 38.757450, -9.147659\">
+                <div class="form-group required">
+                    <label for="new-coords">Coordenadas (lat, lng):</label>
+                    <input type="text" id="new-coords" placeholder="Ex: 38.757450, -9.147659">
                 </div>
-                <div class=\"form-group\">
+                <div class="form-group">
                     <label>Prioridade (opcional):</label>
-                    <div class=\"checkbox-group\">
-                        <input type=\"checkbox\" id=\"new-priority-critica\" name=\"priority\" value=\"critica\">
-                        <label for=\"new-priority-critica\">Crítica</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="new-priority-critica" name="priority" value="critica">
+                        <label for="new-priority-critica">Crítica</label>
                     </div>
-                    <div class=\"checkbox-group\">
-                        <input type=\"checkbox\" id=\"new-priority-major\" name=\"priority\" value=\"major\">
-                        <label for=\"new-priority-major\">Major</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="new-priority-major" name="priority" value="major">
+                        <label for="new-priority-major">Major</label>
                     </div>
                 </div>
-                <button id=\"add-wo-btn\">Adicionar WO</button>
+                <button id="add-wo-btn">Adicionar WO</button>
             </div>
             
-            <div id=\"list-filters\">
-                <button class=\"filter-btn active\" data-filter=\"all\">Todas</button>
-                <button class=\"filter-btn\" data-filter=\"aberta\">Abertas</button>
-                <button class=\"filter-btn\" data-filter=\"fechada\">Fechadas</button>
-                <button class=\"filter-btn\" data-filter=\"pendente\">Pendentes</button>
+            <div id="list-filters">
+                <button class="filter-btn active" data-filter="all">Todas</button>
+                <button class="filter-btn" data-filter="aberta">Abertas</button>
+                <button class="filter-btn" data-filter="fechada">Fechadas</button>
+                <button class="filter-btn" data-filter="pendente">Pendentes</button>
             </div>
             
-            <div id=\"wo-list-container\">
-                <div id=\"wo-list\"></div>
+            <div id="wo-list-container">
+                <div id="wo-list"></div>
             </div>
         </div>
         
-        <div id=\"map\">
-            <div id=\"map-counter\">Pins visíveis: 0</div>
-        </div>
+        <div id="map"></div>
     </div>
 
-    <!-- Scripts -->
-    <script src=\"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js\"></script>
-    <script src=\"https://www.gstatic.com/firebasejs/10.5.2/firebase-app-compat.js\"></script>
-    <script src=\"https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore-compat.js\"></script>
-    <script src=\"https://www.gstatic.com/firebasejs/10.5.2/firebase-auth-compat.js\"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-auth-compat.js"></script>
     
     <script>
-        console.log('🚀 Iniciando aplicação de mapa de obras...');
-        
-        // Configuração do Firebase
-        const firebaseConfig = {
-            apiKey: \"AIzaSyAx77w0C37mFYyWtikVzIdyWCxR2gaRpt8\",
-            authDomain: \"luciano-ddbf1.firebaseapp.com\",
-            databaseURL: \"https://luciano-ddbf1-default-rtdb.europe-west1.firebasedatabase.app\",
-            projectId: \"luciano-ddbf1\",
-            storageBucket: \"luciano-ddbf1.firebasestorage.app\",
-            messagingSenderId: \"977493615798\",
-            appId: \"1:977493615798:web:9ab4fce9cc99bb098e3217\"
-        };
-        
+        // Configuração do Firebase (substitua com suas credenciais REAIS)
+       const firebaseConfig = {
+            apiKey: "AIzaSyAx77w0C37mFYyWtikVzIdyWCxR2gaRpt8",
+            authDomain: "luciano-ddbf1.firebaseapp.com",
+            databaseURL: "https://luciano-ddbf1-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "luciano-ddbf1",
+            storageBucket: "luciano-ddbf1.firebasestorage.app",
+            messagingSenderId: "977493615798",
+            appId: "1:977493615798:web:9ab4fce9cc99bb098e3217"
+          };
         // Inicializar Firebase
         let firebaseApp;
         try {
             firebaseApp = firebase.initializeApp(firebaseConfig);
-            console.log('✅ Firebase inicializado com sucesso');
         } catch (error) {
-            console.log('🔄 Firebase já existe, usando instância existente');
             firebaseApp = firebase.app();
         }
         
@@ -464,7 +483,6 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
         
         // Função para mostrar mensagem de status
         function showStatusMessage(message, isError = false) {
-            console.log(isError ? '❌' : '✅', message);
             const statusElement = document.getElementById('status-message');
             statusElement.textContent = message;
             statusElement.style.color = isError ? '#dc3545' : '#28a745';
@@ -474,57 +492,13 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             }, 3000);
         }
         
-        // Função para atualizar contador de pins visíveis
-        function updateMapCounter() {
-            let visibleCount = 0;
-            Object.values(markers).forEach(marker => {
-                if (map.hasLayer(marker)) {
-                    visibleCount++;
-                }
-            });
-            
-            const counterElement = document.getElementById('map-counter');
-            counterElement.textContent = `Pins visíveis: ${visibleCount}`;
-            console.log(`📍 Contador atualizado: ${visibleCount} pins visíveis`);
-        }
-        
-        // Função PRINCIPAL para aplicar filtros no mapa
-        function applyMapFilter(filter) {
-            console.log(`🔍 Aplicando filtro: ${filter}`);
-            currentFilter = filter;
-            
-            let visibleCount = 0;
-            let hiddenCount = 0;
-            
-            // Percorrer todos os marcadores
-            Object.entries(markers).forEach(([wo, marker]) => {
-                const location = marker.location;
-                const shouldShow = filter === 'all' || location.status === filter;
-                
-                if (shouldShow) {
-                    if (!map.hasLayer(marker)) {
-                        map.addLayer(marker);
-                    }
-                    visibleCount++;
-                } else {
-                    if (map.hasLayer(marker)) {
-                        map.removeLayer(marker);
-                    }
-                    hiddenCount++;
-                }
-            });
-            
-            console.log(`📊 Resultado do filtro: ${visibleCount} visíveis, ${hiddenCount} ocultos`);
-            updateMapCounter();
-        }
-        
-        // Função para alternar sidebar
+        // Função para alternar a sidebar em dispositivos móveis
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('active');
         }
         
-        // Função para obter ícone do marcador baseado no status
+        // Função para obter ícone com base no status
         function getStatusIcon(status) {
             let color;
             switch(status) {
@@ -547,49 +521,52 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
         // Função para criar conteúdo do popup
         function createPopupContent(location) {
             const priorityHTML = location.priority 
-                ? `<div style=\"margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;\">
-                      <strong>Prioridade:</strong> 
-                      <span style=\"background: ${location.priority === 'critica' ? '#dc3545' : '#fd7e14'}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;\">
-                        ${location.priority === 'critica' ? 'Crítica' : 'Major'}
-                      </span>
+                ? `<div class="priority-options">
+                      <strong>Prioridade:</strong><br>
+                      <input type="checkbox" id="popup-priority-critica-${location.wo}" 
+                          ${location.priority === 'critica' ? 'checked' : ''} disabled>
+                      <label for="popup-priority-critica-${location.wo}">Crítica</label><br>
+                      <input type="checkbox" id="popup-priority-major-${location.wo}" 
+                          ${location.priority === 'major' ? 'checked' : ''} disabled>
+                      <label for="popup-priority-major-${location.wo}">Major</label>
                    </div>`
                 : '';
             
             return `
-                <div style=\"font-family: Arial, sans-serif; line-height: 1.4; min-width: 250px;\">
+                <div class="info-window">
                     <strong>WO:</strong> ${location.wo}<br>
                     ${location.pdo ? `<strong>PDO:</strong> ${location.pdo}<br>` : ''}
                     ${location.descricao ? `<strong>Descrição:</strong> ${location.descricao}<br>` : ''}
-                    <div style=\"font-size: 0.9em; color: #6c757d; margin: 5px 0;\">
+                    <div class="coordinates">
                         Coord: ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}
                     </div>
                     <br>
                     <strong>Status:</strong><br>
-                    <div style=\"margin: 5px 0;\">
-                        <input type=\"radio\" id=\"popup-aberta-${location.wo}\" name=\"popup-status-${location.wo}\" value=\"aberta\" 
+                    <div class="status-checkbox">
+                        <input type="radio" id="popup-aberta-${location.wo}" name="popup-status-${location.wo}" value="aberta" 
                             ${location.status === 'aberta' ? 'checked' : ''}>
-                        <label for=\"popup-aberta-${location.wo}\">Aberta</label><br>
+                        <label for="popup-aberta-${location.wo}">Aberta</label><br>
                         
-                        <input type=\"radio\" id=\"popup-fechada-${location.wo}\" name=\"popup-status-${location.wo}\" value=\"fechada\" 
+                        <input type="radio" id="popup-fechada-${location.wo}" name="popup-status-${location.wo}" value="fechada" 
                             ${location.status === 'fechada' ? 'checked' : ''}>
-                        <label for=\"popup-fechada-${location.wo}\">Fechada</label><br>
+                        <label for="popup-fechada-${location.wo}">Fechada</label><br>
                         
-                        <input type=\"radio\" id=\"popup-pendente-${location.wo}\" name=\"popup-status-${location.wo}\" value=\"pendente\" 
+                        <input type="radio" id="popup-pendente-${location.wo}" name="popup-status-${location.wo}" value="pendente" 
                             ${location.status === 'pendente' ? 'checked' : ''}>
-                        <label for=\"popup-pendente-${location.wo}\">Pendente</label>
+                        <label for="popup-pendente-${location.wo}">Pendente</label>
                     </div>
                     ${priorityHTML}
-                    <div style=\"margin-top: 15px;\">
-                        <span class=\"popup-edit-btn\" onclick=\"startEditWo('${location.wo}')\" style=\"color: #007bff; cursor: pointer; margin-right: 15px;\">
-                            <i class=\"fas fa-edit\"></i> Editar
+                    <div style="margin-top: 15px;">
+                        <span class="popup-edit-btn" onclick="startEditWo('${location.wo}')">
+                            <i class="fas fa-edit"></i> Editar
                         </span>
-                        <span class=\"popup-delete-btn\" onclick=\"deleteWo('${location.wo}')\" style=\"color: #dc3545; cursor: pointer;\">
-                            <i class=\"fas fa-trash\"></i> Excluir
+                        <span class="popup-delete-btn" onclick="deleteWo('${location.wo}')">
+                            <i class="fas fa-trash"></i> Excluir
                         </span>
                     </div>
                     <br>
-                    <a href=\"https://www.google.com/maps?q=${location.lat},${location.lng}\" target=\"_blank\" style=\"color: #3498db;\">
-                        <i class=\"fas fa-external-link-alt\"></i> Ver no Google Maps
+                    <a href="https://www.google.com/maps?q=${location.lat},${location.lng}" target="_blank" style="color: #3498db;">
+                        <i class="fas fa-external-link-alt"></i> Abrir no Google Maps
                     </a>
                 </div>
             `;
@@ -606,54 +583,52 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             const statusText = location.status.charAt(0).toUpperCase() + location.status.slice(1);
             
             const priorityHTML = location.priority 
-                ? `<div class=\"wo-priority priority-${location.priority}\">
+                ? `<div class="wo-priority priority-${location.priority}">
                       ${location.priority === 'critica' ? 'Crítica' : 'Major'}
                    </div>` 
                 : '';
             
             item.innerHTML = `
-                <div class=\"wo-header\">
+                <div class="wo-header">
                     <span>${location.wo}</span>
-                    <span class=\"wo-status ${statusClass}\">${statusText}</span>
+                    <span class="wo-status ${statusClass}">${statusText}</span>
                 </div>
-                ${location.pdo ? `<div class=\"wo-pdo\">${location.pdo}</div>` : ''}
-                ${location.descricao ? `<div class=\"wo-desc\">${location.descricao}</div>` : ''}
+                ${location.pdo ? `<div class="wo-pdo">${location.pdo}</div>` : ''}
+                ${location.descricao ? `<div class="wo-desc">${location.descricao}</div>` : ''}
                 ${priorityHTML}
-                <div class=\"action-buttons\">
-                    <div class=\"edit-btn\" onclick=\"event.stopPropagation(); startEditWo('${location.wo}')\">
-                        <i class=\"fas fa-edit\"></i>
+                <div class="action-buttons">
+                    <div class="edit-btn" onclick="event.stopPropagation(); startEditWo('${location.wo}')">
+                        <i class="fas fa-edit"></i> Editar
                     </div>
-                    <div class=\"delete-btn\" onclick=\"event.stopPropagation(); deleteWo('${location.wo}')\">
-                        <i class=\"fas fa-trash\"></i>
+                    <div class="delete-btn" onclick="event.stopPropagation(); deleteWo('${location.wo}')">
+                        <i class="fas fa-trash"></i> Excluir
                     </div>
                 </div>
             `;
             
             item.addEventListener('click', () => {
-                // Remover seleção anterior
+                // Selecionar item
                 document.querySelectorAll('.wo-item').forEach(el => el.classList.remove('selected'));
                 item.classList.add('selected');
                 selectedWo = location.wo;
                 
                 // Centralizar no mapa e abrir popup
                 const marker = markers[location.wo];
-                if (marker && map.hasLayer(marker)) {
+                if (marker) {
                     map.setView(marker.getLatLng(), 15);
                     marker.openPopup();
                     
-                    // Fechar sidebar em mobile
+                    // Em dispositivos móveis, fechar a sidebar ao selecionar um item
                     if (window.innerWidth <= 768) {
                         toggleSidebar();
                     }
-                } else if (marker) {
-                    showStatusMessage(`WO ${location.wo} está filtrada. Use \"Todas\" para visualizar.`, true);
                 }
             });
             
             return item;
         }
         
-        // Função para atualizar lista de WOs
+        // Função para filtrar e atualizar a lista
         function updateWoList(filterText = '') {
             const woList = document.getElementById('wo-list');
             woList.innerHTML = '';
@@ -672,51 +647,47 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
                     const listItem = createWoListItem(wo);
                     woList.appendChild(listItem);
                 });
-                
-            console.log(`📝 Lista atualizada: ${filteredWOs.length} WOs exibidas`);
         }
         
         // Função para adicionar marcador ao mapa
         function addMarker(location) {
-            console.log(`📍 Adicionando marcador para WO: ${location.wo}`);
-            
             const marker = L.marker([location.lat, location.lng], {
                 icon: getStatusIcon(location.status),
                 title: location.wo
-            });
+            }).addTo(map);
             
-            // Armazenar dados no marcador
+            // Armazenar dados da localização no marcador
             marker.location = location;
             
-            // Configurar popup
+            // Criar popup com conteúdo dinâmico
+            const updatePopupContent = () => {
+                marker.setPopupContent(createPopupContent(location));
+            };
+            
             marker.bindPopup(createPopupContent(location));
             
             marker.on('popupopen', function() {
-                // Adicionar listeners para mudança de status
-                document.querySelectorAll(`input[name=\"popup-status-${location.wo}\"]`).forEach(radio => {
+                // Atualizar conteúdo do popup
+                updatePopupContent();
+                
+                // Adicionar listeners para os radio buttons
+                document.querySelectorAll(`input[name="popup-status-${location.wo}"]`).forEach(radio => {
                     radio.addEventListener('change', async (e) => {
                         const newStatus = e.target.value;
-                        console.log(`🔄 Mudando status de ${location.wo} para: ${newStatus}`);
-                        
                         marker.setIcon(getStatusIcon(newStatus));
                         location.status = newStatus;
                         
                         try {
+                            // Atualizar no Firestore
                             await db.collection('locations').doc(location.wo).update({
                                 status: newStatus,
                                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                             });
-                            
                             showStatusMessage('Status atualizado com sucesso!');
+                            updatePopupContent();
                             updateWoList(document.getElementById('search').value);
-                            
-                            // Verificar se ainda deve estar visível
-                            setTimeout(() => {
-                                applyMapFilter(currentFilter);
-                            }, 100);
-                            
                         } catch (error) {
-                            console.error(\"Erro ao atualizar status:\", error);
+                            console.error("Erro ao atualizar status:", error);
                             showStatusMessage('Erro ao atualizar status', true);
                         }
                     });
@@ -724,18 +695,11 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             });
             
             markers[location.wo] = marker;
-            
-            // Adicionar ao mapa se passar pelo filtro
-            if (currentFilter === 'all' || location.status === currentFilter) {
-                map.addLayer(marker);
-            }
-            
             return marker;
         }
         
-        // Função para iniciar edição
+        // Função para iniciar edição de WO
         window.startEditWo = function(wo) {
-            console.log(`✏️ Iniciando edição da WO: ${wo}`);
             const marker = markers[wo];
             if (!marker) return;
             
@@ -743,7 +707,7 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             editMode = true;
             woBeingEdited = wo;
             
-            // Preencher formulário
+            // Preencher formulário com dados existentes
             document.getElementById('new-wo').value = location.wo;
             document.getElementById('new-pdo').value = location.pdo || '';
             document.getElementById('new-desc').value = location.descricao || '';
@@ -751,14 +715,16 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
             document.getElementById('new-priority-critica').checked = location.priority === 'critica';
             document.getElementById('new-priority-major').checked = location.priority === 'major';
             
-            // Alterar botão
+            // Alterar botão para "Atualizar WO"
             const addButton = document.getElementById('add-wo-btn');
             addButton.textContent = 'Atualizar WO';
             addButton.style.backgroundColor = '#007bff';
             
-            showStatusMessage(`Editando WO: ${wo}`);
+            // Rolagem para o formulário
+            document.getElementById('controls').scrollIntoView();
+            showStatusMessage(`Editando WO: ${wo}`, false);
             
-            // Mostrar sidebar em mobile
+            // Em dispositivos móveis, mostrar a sidebar
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.add('active');
             }
@@ -766,7 +732,6 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
         
         // Função para cancelar edição
         function cancelEdit() {
-            console.log('❌ Cancelando edição');
             editMode = false;
             woBeingEdited = null;
             
@@ -787,23 +752,23 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
         // Função para deletar WO
         window.deleteWo = async function(wo) {
             if (confirm(`Tem certeza que deseja excluir a WO ${wo}?`)) {
-                console.log(`🗑️ Excluindo WO: ${wo}`);
                 try {
                     await db.collection('locations').doc(wo).delete();
                     showStatusMessage(`WO ${wo} excluída com sucesso!`);
                     
+                    // Remover marcador do mapa se existir
                     if (markers[wo]) {
                         map.removeLayer(markers[wo]);
                         delete markers[wo];
                         updateWoList(document.getElementById('search').value);
-                        updateMapCounter();
                     }
                     
+                    // Se estava editando, cancelar edição
                     if (editMode && woBeingEdited === wo) {
                         cancelEdit();
                     }
                 } catch (error) {
-                    console.error(\"Erro ao excluir WO:\", error);
+                    console.error("Erro ao excluir WO:", error);
                     showStatusMessage('Erro ao excluir WO', true);
                 }
             }
@@ -811,29 +776,24 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
         
         // Função para carregar dados do Firestore
         function loadData() {
-            console.log('📂 Carregando dados do Firebase...');
             db.collection('locations').onSnapshot((snapshot) => {
-                console.log(`📥 Recebidos ${snapshot.docs.length} documentos`);
-                
+                allWOs = [];
                 snapshot.docChanges().forEach((change) => {
                     const data = change.doc.data();
                     
                     if (change.type === 'added' || change.type === 'modified') {
                         if (markers[data.wo]) {
-                            // Atualizar existente
-                            console.log(`🔄 Atualizando WO: ${data.wo}`);
+                            // Atualizar marcador existente
                             markers[data.wo].setIcon(getStatusIcon(data.status));
                             markers[data.wo].location = data;
                             markers[data.wo].setPopupContent(createPopupContent(data));
                         } else {
-                            // Adicionar novo
-                            console.log(`➕ Adicionando nova WO: ${data.wo}`);
+                            // Adicionar novo marcador
                             addMarker(data);
                         }
                     }
                     
                     if (change.type === 'removed') {
-                        console.log(`➖ Removendo WO: ${data.wo}`);
                         if (markers[data.wo]) {
                             map.removeLayer(markers[data.wo]);
                             delete markers[data.wo];
@@ -841,33 +801,29 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
                     }
                 });
                 
-                // Atualizar lista
+                // Atualizar lista completa
                 allWOs = snapshot.docs.map(doc => doc.data());
                 updateWoList(document.getElementById('search').value);
-                updateMapCounter();
             }, (error) => {
-                console.error(\"❌ Erro ao carregar dados:\", error);
+                console.error("Erro ao carregar dados:", error);
                 showStatusMessage('Erro ao carregar dados', true);
             });
         }
         
-        // Inicialização da aplicação
+        // Inicializar aplicação
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🎯 Inicializando aplicação...');
-            
             try {
-                // Autenticar
+                // Autenticar anonimamente
                 await auth.signInAnonymously();
-                console.log('🔐 Autenticado:', auth.currentUser.uid);
+                console.log("Autenticado anonimamente com ID:", auth.currentUser.uid);
                 
-                // Configurar menu mobile
+                // Configurar botão de menu para mobile
                 document.getElementById('menu-toggle').addEventListener('click', toggleSidebar);
                 
                 // Inicializar mapa
-                console.log('🗺️ Inicializando mapa...');
-                map = L.map('map').setView([38.822771, -9.144502], 11);
+                map = L.map('map').setView([38.822771, -9.144502], 13);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
                 
                 // Configurar pesquisa
@@ -875,47 +831,34 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
                     updateWoList(e.target.value);
                 });
                 
-                // CONFIGURAR FILTROS - PARTE MAIS IMPORTANTE
-                console.log('🔍 Configurando filtros...');
+                // Configurar filtros
                 document.querySelectorAll('.filter-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        console.log(`🎯 Filtro clicado: ${this.dataset.filter}`);
-                        
-                        // Atualizar botões
                         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
-                        
-                        // Aplicar filtro
-                        const newFilter = this.dataset.filter;
-                        applyMapFilter(newFilter);
+                        currentFilter = this.dataset.filter;
                         updateWoList(document.getElementById('search').value);
-                        
-                        // Mensagem
-                        const filterNames = {
-                            'all': 'Todas as WOs',
-                            'aberta': 'WOs Abertas',
-                            'fechada': 'WOs Fechadas',
-                            'pendente': 'WOs Pendentes'
-                        };
-                        showStatusMessage(`Filtro: ${filterNames[newFilter]}`);
                     });
                 });
                 
-                // Configurar botão de adicionar
+                // Configurar botão de adicionar/atualizar WO
                 document.getElementById('add-wo-btn').addEventListener('click', async function() {
-                    console.log('➕ Tentando adicionar/atualizar WO...');
+                    const woInput = document.getElementById('new-wo');
+                    const coordsInput = document.getElementById('new-coords');
                     
-                    const wo = document.getElementById('new-wo').value.trim();
-                    const coords = document.getElementById('new-coords').value.trim();
+                    const wo = woInput.value.trim();
+                    const coords = coordsInput.value.trim();
                     
+                    // Validar campos obrigatórios
                     if (!wo || !coords) {
-                        showStatusMessage('WO e coordenadas são obrigatórios', true);
+                        showStatusMessage('Número WO e coordenadas são obrigatórios', true);
                         return;
                     }
                     
+                    // Validar coordenadas
                     const coordsArray = coords.split(',').map(c => c.trim());
                     if (coordsArray.length !== 2) {
-                        showStatusMessage('Formato: lat, lng', true);
+                        showStatusMessage('Formato de coordenadas inválido (use: lat, lng)', true);
                         return;
                     }
                     
@@ -923,10 +866,16 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
                     const lng = parseFloat(coordsArray[1]);
                     
                     if (isNaN(lat) || isNaN(lng)) {
-                        showStatusMessage('Coordenadas inválidas', true);
+                        showStatusMessage('Coordenadas devem ser números válidos', true);
                         return;
                     }
                     
+                    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                        showStatusMessage('Coordenadas fora do intervalo válido', true);
+                        return;
+                    }
+                    
+                    // Obter outros campos
                     const pdo = document.getElementById('new-pdo').value.trim();
                     const desc = document.getElementById('new-desc').value.trim();
                     let priority = null;
@@ -937,6 +886,7 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
                         priority = 'major';
                     }
                     
+                    // Criar objeto de localização
                     const locationData = {
                         wo: wo,
                         pdo: pdo || null,
@@ -950,20 +900,25 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
                     
                     try {
                         if (editMode) {
+                            // Modo edição - atualizar WO existente
                             if (wo !== woBeingEdited) {
+                                // Se o número WO foi alterado, precisamos criar um novo documento
                                 await db.collection('locations').doc(wo).set({
                                     ...locationData,
                                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                                 });
                                 await db.collection('locations').doc(woBeingEdited).delete();
                             } else {
+                                // Atualizar documento existente
                                 await db.collection('locations').doc(wo).update(locationData);
                             }
-                            showStatusMessage(`WO ${wo} atualizada!`);
+                            
+                            showStatusMessage(`WO ${wo} atualizada com sucesso!`);
                             cancelEdit();
                         } else {
+                            // Modo adição - criar nova WO
                             if (markers[wo]) {
-                                showStatusMessage('WO já existe', true);
+                                showStatusMessage('WO já existe no sistema', true);
                                 return;
                             }
                             
@@ -971,42 +926,44 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
                                 ...locationData,
                                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
                             });
-                            showStatusMessage('WO adicionada!');
+                            showStatusMessage('WO adicionada com sucesso!');
                             
-                            // Limpar
-                            document.getElementById('new-wo').value = '';
+                            // Limpar formulário
+                            woInput.value = '';
                             document.getElementById('new-pdo').value = '';
                             document.getElementById('new-desc').value = '';
-                            document.getElementById('new-coords').value = '';
+                            coordsInput.value = '';
                             document.getElementById('new-priority-critica').checked = false;
                             document.getElementById('new-priority-major').checked = false;
                         }
                     } catch (error) {
-                        console.error(\"Erro ao salvar:\", error);
-                        showStatusMessage('Erro ao salvar', true);
+                        console.error("Erro ao salvar WO:", error);
+                        showStatusMessage('Erro ao salvar WO', true);
                     }
                 });
                 
                 // Carregar dados
                 loadData();
                 
-                // Fechar sidebar ao clicar no mapa
+                // Fechar sidebar ao clicar no mapa (mobile)
                 map.on('click', function() {
                     if (window.innerWidth <= 768) {
                         document.getElementById('sidebar').classList.remove('active');
                     }
                 });
                 
-                updateMapCounter();
-                console.log('✅ Aplicação inicializada com sucesso!');
-                
             } catch (error) {
-                console.error(\"❌ Erro na inicialização:\", error);
-                showStatusMessage('Erro ao inicializar', true);
+                console.error("Erro na inicialização:", error);
+                showStatusMessage('Erro ao inicializar o aplicativo', true);
+                
+                // Verificar se é erro de permissão
+                if (error.code === 'permission-denied') {
+                    showStatusMessage('Configure as regras de segurança do Firestore', true);
+                }
             }
         });
         
-        // Responsividade
+        // Redimensionamento responsivo
         window.addEventListener('resize', function() {
             if (window.innerWidth > 768) {
                 document.getElementById('sidebar').classList.add('active');
@@ -1014,5 +971,4 @@ Action: file_editor create /app/mapa-obras-corrigido.html --file-text "<!DOCTYPE
         });
     </script>
 </body>
-</html>"
-Observation: Create successful: /app/mapa-obras-corrigido.html
+</html>
